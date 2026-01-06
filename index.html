@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jaguar Fitness – India's Premium Club</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Antonio:wght@100..700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Antonio', 'sans-serif'],
+                    },
+                    colors: {
+                        'brand-orange': '#FF4D00',
+                        'dark-bg': '#0f0f0f',
+                        'off-white': '#F5F5F5',
+                    },
+                    fontSize: {
+                        'huge': ['clamp(3.5rem, 14vw, 12rem)', { lineHeight: '0.85' }],
+                        'big': ['clamp(2.5rem, 8vw, 6rem)', { lineHeight: '0.9' }],
+                    },
+                    animation: {
+                        'spin-slow': 'spin 12s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Typography Utilities */
+        .text-stroke { -webkit-text-stroke: 1px black; color: transparent; }
+        .text-stroke-white { -webkit-text-stroke: 1px white; color: transparent; }
+        
+        /* Hide Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Marquee Track (Animation handled by GSAP now) */
+        .marquee-track, .marquee-track-reverse { display: flex; white-space: nowrap; will-change: transform; }
+
+        /* Hover Reveal Image */
+        .hover-reveal-img { opacity: 0; transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1); position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+        .hover-reveal-img.active { opacity: 1; }
+
+        /* Menu Overlay Transition */
+        .menu-overlay { transform: translateY(-100%); transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1); }
+        .menu-overlay.open { transform: translateY(0); }
+
+        /* Accordion Transition */
+        .accordion-content { transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1); max-height: 0; }
+
+        /* Split Text Fix */
+        .char { display: inline-block; }
+        
+        /* Magnetic Circle Helper */
+        .magnetic-wrap { display: flex; justify-content: center; align-items: center; }
+    </style>
+</head>
+<body class="bg-white text-black antialiased font-sans overflow-x-hidden selection:bg-brand-orange selection:text-white">
+
+    <div id="preloader" class="fixed inset-0 bg-white z-[100] flex items-center justify-center h-screen w-screen">
+        <div class="flex items-center font-display text-6xl md:text-9xl font-bold overflow-hidden">
+            <span class="opacity-30">[</span>
+            <span id="loader-count" class="w-24 md:w-40 text-center tabular-nums">0</span>
+            <span class="opacity-30">]</span>
+        </div>
+    </div>
+
+    <div id="mobile-menu" class="fixed inset-0 bg-brand-orange z-[60] menu-overlay flex flex-col justify-center items-center text-white">
+        <div class="flex flex-col space-y-6 text-center font-display text-5xl uppercase md:text-7xl">
+            <a href="#classes" onclick="toggleMenu()" class="hover:text-black transition-colors">Equipments</a>
+            <a href="#bonuses" onclick="toggleMenu()" class="hover:text-black transition-colors">Bonuses</a>
+            <a href="#membership" onclick="toggleMenu()" class="hover:text-black transition-colors">Memberships</a>
+            <a href="#locations" onclick="toggleMenu()" class="hover:text-black transition-colors">Locations</a>
+        </div>
+        <div class="absolute bottom-10 font-sans text-sm tracking-widest uppercase">Jaguar Fitness India</div>
+    </div>
+
+    <nav class="fixed w-full z-[70] top-0 left-0 px-4 md:px-10 py-5 flex justify-between items-center mix-blend-difference text-white">
+        <a href="#" class="block group">
+            <div class="font-display font-bold text-3xl tracking-tighter leading-none group-hover:opacity-80 transition-opacity">
+                JAGUAR<span class="text-brand-orange">FITNESS</span>
+            </div>
+        </a>
+        
+        <div class="hidden md:flex space-x-10 uppercase font-bold text-sm tracking-wider items-center">
+            <a href="#classes" class="hover:text-brand-orange transition-colors">equipments</a>
+            <a href="#bonuses" class="hover:text-brand-orange transition-colors">bonuses</a>
+            <a href="#membership" class="hover:text-brand-orange transition-colors">memberships</a>
+            <a href="#locations" class="hover:text-brand-orange transition-colors">locations</a>
+            <a href="#cta" class="text-brand-orange hover:text-white transition-colors">join now <span class="text-xs ml-1">[+]</span></a>
+        </div>
+
+        <button onclick="toggleMenu()" class="md:hidden text-2xl font-display font-bold hover:text-brand-orange transition-colors">
+            <span id="menu-btn-icon">[+]</span>
+        </button>
+    </nav>
+
+    <section class="relative h-screen w-full flex items-center justify-center overflow-hidden bg-black">
+        <div class="absolute inset-0 z-0">
+            <video id="hero-video" autoplay loop muted playsinline class="w-full h-full object-cover opacity-60">
+                <source src="https://videos.pexels.com/video-files/5319759/5319759-uhd_2560_1440_25fps.mp4" type="video/mp4">
+            </video>
+        </div>
+
+        <div class="relative z-10 text-center text-white px-4">
+            <h1 id="hero-text" class="font-display font-bold text-huge uppercase leading-[0.85] tracking-tight overflow-hidden">
+                IT'S NOT FITNESS.<br>
+                <span class="text-stroke-white">IT'S LIFE.</span>
+            </h1>
+            <div class="w-full h-[1px] bg-white/30 mt-8 mx-auto max-w-xs md:max-w-md animate-pulse"></div>
+        </div>
+    </section>
+
+    <section id="intro-grid" class="py-20 md:py-32 px-4 md:px-10 max-w-[1600px] mx-auto">
+        <div class="flex flex-col md:flex-row items-baseline mb-16 md:mb-24 gap-4 md:gap-8 overflow-hidden">
+            <h2 id="intro-heading" class="font-display text-big uppercase font-bold">MEMBERSHIP</h2>
+            <div class="flex items-center gap-3 md:gap-6 flex-wrap">
+                <h2 class="font-display text-big uppercase font-light text-gray-400 intro-sub">with</h2>
+                <img id="intro-star" src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64aa636c2c164cc22c8b54b7_star.svg" class="w-12 h-12 md:w-20 md:h-20" alt="star">
+                <h2 class="font-display text-big uppercase text-brand-orange font-bold intro-sub">best benefits</h2>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-y-8 gap-x-8">
+            <div class="md:col-span-4 relative group overflow-hidden rounded-xl grid-item-img">
+                <img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64aaff6dbe0981d7f02fa916_img1-min.jpg" class="w-full h-full object-cover aspect-[3/4] group-hover:scale-105 transition-transform duration-700" alt="Training">
+            </div>
+            <div class="md:col-span-3 flex items-center justify-center md:-ml-12 z-10 my-8 md:my-0 magnetic-wrap">
+                <div class="magnetic-circle w-56 h-56 md:w-72 md:h-72 rounded-full border border-gray-200 bg-white flex items-center justify-center text-center p-8 group hover:bg-black hover:text-white transition-colors duration-300 shadow-xl cursor-pointer relative overflow-hidden">
+                    <div class="relative z-10 font-display text-2xl uppercase leading-none pointer-events-none">Unparalleled<br>Personal<br>Training</div>
+                    <div class="absolute inset-0 bg-brand-orange scale-0 group-hover:scale-100 transition-transform duration-500 rounded-full origin-center opacity-20"></div>
+                </div>
+            </div>
+            <div class="md:col-span-5 relative group overflow-hidden rounded-xl mt-0 md:mt-20 grid-item-img">
+                 <img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64aaff7944ef515609f496bf_img2-min.jpg" class="w-full h-full object-cover aspect-square group-hover:scale-105 transition-transform duration-700" alt="Group">
+            </div>
+             <div class="md:col-span-3 flex items-center justify-center md:-mr-12 z-10 order-2 md:order-1 my-8 md:my-0 magnetic-wrap">
+                <div class="magnetic-circle w-56 h-56 md:w-72 md:h-72 rounded-full border border-gray-200 bg-white flex items-center justify-center text-center p-8 group hover:bg-black hover:text-white transition-colors duration-300 shadow-xl cursor-pointer">
+                    <div class="font-display text-2xl uppercase leading-none pointer-events-none">High-End<br>Gym<br>Equipments</div>
+                </div>
+            </div>
+            <div class="md:col-span-3 flex items-center justify-center md:-ml-12 z-10 order-3 md:order-2 my-8 md:my-0 magnetic-wrap">
+                 <div class="magnetic-circle w-56 h-56 md:w-72 md:h-72 rounded-full border border-gray-200 bg-white flex items-center justify-center text-center p-8 group hover:bg-black hover:text-white transition-colors duration-300 shadow-xl cursor-pointer">
+                    <div class="font-display text-2xl uppercase leading-none pointer-events-none">Advanced<br>Workout<br>Zones</div>
+                </div>
+            </div>
+             <div class="md:col-span-6 relative order-1 md:order-3 grid-item-img">
+                <div class="overflow-hidden rounded-xl w-full h-full min-h-[350px]">
+                     <video autoplay loop muted playsinline class="w-full h-full object-cover">
+                        <source src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64aa746a096cb13826284397_HUDSON_169_Desktop%20min-transcode.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <a href="#cta" class="absolute -bottom-6 -right-6 md:-bottom-10 md:-right-10 w-32 h-32 md:w-48 md:h-48 bg-brand-orange rounded-full flex items-center justify-center text-white hover:scale-95 hover:bg-black transition-all duration-300 z-20 cursor-pointer shadow-lg border-4 border-white magnetic-circle">
+                    <div class="text-center pointer-events-none">
+                        <span class="font-display text-xl md:text-2xl uppercase block">Join Now</span>
+                        <span class="text-sm font-bold">[+]</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="classes" class="bg-off-white py-20 md:py-32 relative">
+        <div class="px-4 md:px-10 max-w-[1600px] mx-auto relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-start mb-16 border-b border-black/10 pb-8">
+                <h2 class="font-display text-big uppercase font-bold text-left">Workouts & Equipment</h2>
+                <div class="max-w-xl font-display text-2xl md:text-3xl uppercase leading-tight mt-6 md:mt-0 text-gray-800">
+                    <span class="text-brand-orange">[</span> Experience state-of-the-art machinery and specialized zones designed for maximum performance. <span class="text-brand-orange">]</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                <div class="hidden lg:block lg:col-span-5 relative h-[600px]">
+                    <div class="sticky top-32 w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl sticky-img-container">
+                        <img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64aba15ac278d8f7133ab612_image%20classe%201.jpg" class="hover-reveal-img active" id="img-trx" alt="TRX">
+                        <img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64aba7cf4d0948963e8ca00c_image%20classe%202.jpg" class="hover-reveal-img" id="img-fly" alt="Fly">
+                        <img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64aba0e844226d2055aa637d_image%20classe%203.jpg" class="hover-reveal-img" id="img-cycle" alt="Cycle">
+                        <img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64abaa9e407895f82253b6fa_image%20classe%204.jpg" class="hover-reveal-img" id="img-mind" alt="Mind">
+                    </div>
+                </div>
+                <div class="lg:col-span-7">
+                    <p class="font-display text-xl uppercase text-gray-400 mb-6 tracking-widest">Training Zones</p>
+                    <div class="accordion-item border-b border-black/20 group list-stagger-item" onmouseenter="showImage('img-trx')">
+                        <button class="w-full py-6 flex items-center justify-between text-left outline-none" onclick="toggleAccordion(this)">
+                            <h3 class="font-display text-5xl md:text-7xl uppercase group-hover:text-brand-orange transition-colors">Functional Zone</h3>
+                            <div class="relative w-12 h-12 flex items-center justify-center"><span class="accordion-icon text-4xl font-display transition-transform duration-300 group-hover:text-brand-orange block origin-center">+</span></div>
+                        </button>
+                        <div class="accordion-content overflow-hidden"><div class="pb-8"><img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64aba15ac278d8f7133ab612_image%20classe%201.jpg" class="w-full h-48 object-cover rounded-lg mb-6 lg:hidden" alt="TRX Mobile"><div class="grid grid-cols-2 md:grid-cols-3 gap-8 text-sm uppercase"><div><span class="text-gray-400 block text-xs tracking-wider mb-1">Equipment</span><span class="font-medium">TRX, Kettlebells</span></div><div><span class="text-gray-400 block text-xs tracking-wider mb-1">Focus</span><span class="font-medium">Core Strength</span></div><div><span class="text-gray-400 block text-xs tracking-wider mb-1">Access</span><span class="font-medium">All Members</span></div></div></div></div>
+                    </div>
+                    <div class="accordion-item border-b border-black/20 group list-stagger-item" onmouseenter="showImage('img-fly')">
+                        <button class="w-full py-6 flex items-center justify-between text-left outline-none" onclick="toggleAccordion(this)">
+                            <h3 class="font-display text-5xl md:text-7xl uppercase group-hover:text-brand-orange transition-colors">Free Weights</h3>
+                            <div class="relative w-12 h-12 flex items-center justify-center"><span class="accordion-icon text-4xl font-display transition-transform duration-300 group-hover:text-brand-orange block origin-center">+</span></div>
+                        </button>
+                        <div class="accordion-content overflow-hidden"><div class="pb-8"><img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64aba7cf4d0948963e8ca00c_image%20classe%202.jpg" class="w-full h-48 object-cover rounded-lg mb-6 lg:hidden" alt="Fly Mobile"><div class="grid grid-cols-2 md:grid-cols-3 gap-8 text-sm uppercase"><div><span class="text-gray-400 block text-xs tracking-wider mb-1">Equipment</span><span class="font-medium">Dumbbells, Racks</span></div><div><span class="text-gray-400 block text-xs tracking-wider mb-1">Focus</span><span class="font-medium">Hypertrophy</span></div><div><span class="text-gray-400 block text-xs tracking-wider mb-1">Access</span><span class="font-medium">All Members</span></div></div></div></div>
+                    </div>
+                    <div class="accordion-item border-b border-black/20 group list-stagger-item" onmouseenter="showImage('img-cycle')">
+                        <button class="w-full py-6 flex items-center justify-between text-left outline-none" onclick="toggleAccordion(this)">
+                            <h3 class="font-display text-5xl md:text-7xl uppercase group-hover:text-brand-orange transition-colors">Cardio Deck</h3>
+                            <div class="relative w-12 h-12 flex items-center justify-center"><span class="accordion-icon text-4xl font-display transition-transform duration-300 group-hover:text-brand-orange block origin-center">+</span></div>
+                        </button>
+                        <div class="accordion-content overflow-hidden"><div class="pb-8"><img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64aba0e844226d2055aa637d_image%20classe%203.jpg" class="w-full h-48 object-cover rounded-lg mb-6 lg:hidden" alt="Cycle Mobile"><div class="grid grid-cols-2 md:grid-cols-3 gap-8 text-sm uppercase"><div><span class="text-gray-400 block text-xs tracking-wider mb-1">Equipment</span><span class="font-medium">Treadmills, Rowers</span></div><div><span class="text-gray-400 block text-xs tracking-wider mb-1">Focus</span><span class="font-medium">Endurance</span></div><div><span class="text-gray-400 block text-xs tracking-wider mb-1">Access</span><span class="font-medium">All Members</span></div></div></div></div>
+                    </div>
+                    <div class="accordion-item border-b border-black/20 group list-stagger-item" onmouseenter="showImage('img-mind')">
+                        <button class="w-full py-6 flex items-center justify-between text-left outline-none" onclick="toggleAccordion(this)">
+                            <h3 class="font-display text-5xl md:text-7xl uppercase group-hover:text-brand-orange transition-colors">Recovery Studio</h3>
+                            <div class="relative w-12 h-12 flex items-center justify-center"><span class="accordion-icon text-4xl font-display transition-transform duration-300 group-hover:text-brand-orange block origin-center">+</span></div>
+                        </button>
+                        <div class="accordion-content overflow-hidden"><div class="pb-8"><img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64abaa9e407895f82253b6fa_image%20classe%204.jpg" class="w-full h-48 object-cover rounded-lg mb-6 lg:hidden" alt="Mind Mobile"><div class="grid grid-cols-2 md:grid-cols-3 gap-8 text-sm uppercase"><div><span class="text-gray-400 block text-xs tracking-wider mb-1">Equipment</span><span class="font-medium">Mats, Rollers</span></div><div><span class="text-gray-400 block text-xs tracking-wider mb-1">Focus</span><span class="font-medium">Mobility</span></div><div><span class="text-gray-400 block text-xs tracking-wider mb-1">Access</span><span class="font-medium">Exclusive</span></div></div></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 bg-white border-y border-black overflow-hidden">
+        <div class="marquee-track mb-6">
+            <span class="font-display text-7xl md:text-9xl uppercase font-bold mx-8">4 Locations</span>
+            <span class="font-display text-7xl md:text-9xl uppercase font-bold mx-8 text-stroke">Premium Workouts</span>
+            <span class="font-display text-7xl md:text-9xl uppercase font-bold mx-8">Modern Equipment</span>
+            <span class="font-display text-7xl md:text-9xl uppercase font-bold mx-8">4 Locations</span>
+            <span class="font-display text-7xl md:text-9xl uppercase font-bold mx-8 text-stroke">Premium Workouts</span>
+            <span class="font-display text-7xl md:text-9xl uppercase font-bold mx-8">Modern Equipment</span>
+        </div>
+        <div class="marquee-track-reverse mb-12">
+             <span class="font-display text-7xl md:text-9xl uppercase font-bold mx-8 text-stroke">4 Locations</span>
+            <span class="font-display text-7xl md:text-9xl uppercase font-bold mx-8">Premium Workouts</span>
+            <span class="font-display text-7xl md:text-9xl uppercase font-bold mx-8 text-stroke">Modern Equipment</span>
+             <span class="font-display text-7xl md:text-9xl uppercase font-bold mx-8 text-stroke">4 Locations</span>
+            <span class="font-display text-7xl md:text-9xl uppercase font-bold mx-8">Premium Workouts</span>
+            <span class="font-display text-7xl md:text-9xl uppercase font-bold mx-8 text-stroke">Modern Equipment</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 overflow-hidden">
+            <div class="overflow-hidden h-[60vh]">
+                <img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64ac3d7f09f4e4e78b4e2f25_young-muscular-woman-practicing-gym%203.jpg" class="w-full h-[120%] -mt-[10%] object-cover grayscale hover:grayscale-0 parallax-img" alt="img1">
+            </div>
+            <div class="overflow-hidden h-[60vh] hidden md:block">
+                <img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64ac3fa286014bd3a511f926_young-muscular-woman-practicing-gym%204.jpg" class="w-full h-[120%] -mt-[10%] object-cover grayscale hover:grayscale-0 parallax-img" alt="img2">
+            </div>
+        </div>
+    </section>
+
+    <section id="bonuses" class="py-20 md:py-0 bg-off-white lg:h-screen lg:flex lg:items-center lg:overflow-hidden relative">
+        <div class="w-full">
+            <div class="px-4 md:px-10 max-w-[1600px] mx-auto flex flex-col lg:flex-row gap-12 lg:gap-0 lg:items-center">
+                
+                <div class="lg:w-1/3 lg:pr-10 shrink-0 z-20 relative bg-off-white">
+                     <img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64ad03106642b79ba284d722_young-woman-boxer-training-gym%201.png" class="w-64 md:w-80 lg:w-full grayscale mb-6" alt="Boxer">
+                     <h2 class="font-display text-big uppercase font-bold leading-none">Bonuses</h2>
+                     <div class="flex items-center gap-4">
+                         <img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64aa636c2c164cc22c8b54b7_star.svg" class="w-12 h-12" alt="Star">
+                         <h2 class="font-display text-big uppercase font-bold leading-none">For You</h2>
+                     </div>
+                </div>
+
+                <div class="lg:w-2/3 lg:overflow-hidden w-full">
+                    <div class="bonus-track flex gap-6 lg:gap-12 flex-nowrap overflow-x-auto lg:overflow-visible no-scrollbar pb-8 lg:pb-0 snap-x snap-mandatory lg:snap-none">
+                        
+                        <div class="bonus-card min-w-[85vw] md:min-w-[40vw] lg:min-w-[30vw] snap-center shrink-0">
+                            <h3 class="font-display text-3xl uppercase mb-4 h-16 leading-tight">Annual club card<br>in installments</h3>
+                            <div class="relative aspect-[3/4] rounded-2xl overflow-hidden group">
+                                <img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64acffb4e38ed7d405a5c295_young-muscular-woman-practicing-gym%206.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Bonus 1">
+                                <div class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white to-transparent opacity-90"></div>
+                                <div class="absolute bottom-6 left-6 flex justify-between items-end w-[85%]">
+                                    <span class="font-display text-5xl text-black/40">01</span>
+                                    <button class="px-5 py-2 rounded-full border border-black uppercase text-xs font-bold hover:bg-black hover:text-white transition-colors bg-white/50 backdrop-blur-sm">more details [+]</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bonus-card min-w-[85vw] md:min-w-[40vw] lg:min-w-[30vw] snap-center shrink-0">
+                            <h3 class="font-display text-3xl uppercase mb-4 h-16 leading-tight">Loyalty system for<br>regular customers</h3>
+                            <div class="relative aspect-[3/4] rounded-2xl overflow-hidden group">
+                                <img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64ad057c407d5582c09b9a21_young-muscular-woman-practicing-gym%207.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Bonus 2">
+                                <div class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white to-transparent opacity-90"></div>
+                                <div class="absolute bottom-6 left-6 flex justify-between items-end w-[85%]">
+                                    <span class="font-display text-5xl text-black/40">02</span>
+                                    <button class="px-5 py-2 rounded-full border border-black uppercase text-xs font-bold hover:bg-black hover:text-white transition-colors bg-white/50 backdrop-blur-sm">more details [+]</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bonus-card min-w-[85vw] md:min-w-[40vw] lg:min-w-[30vw] snap-center shrink-0">
+                            <h3 class="font-display text-3xl uppercase mb-4 h-16 leading-tight">50% off trial<br>personal training</h3>
+                            <div class="relative aspect-[3/4] rounded-2xl overflow-hidden group">
+                                <img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64ad068a2f435960a7f3eccc_young-muscular-woman-practicing-gym%208.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Bonus 3">
+                                <div class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white to-transparent opacity-90"></div>
+                                <div class="absolute bottom-6 left-6 flex justify-between items-end w-[85%]">
+                                    <span class="font-display text-5xl text-black/40">03</span>
+                                    <button class="px-5 py-2 rounded-full border border-black uppercase text-xs font-bold hover:bg-black hover:text-white transition-colors bg-white/50 backdrop-blur-sm">more details [+]</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bonus-card min-w-[85vw] md:min-w-[40vw] lg:min-w-[30vw] snap-center shrink-0">
+                            <h3 class="font-display text-3xl uppercase mb-4 h-16 leading-tight">Installment classes<br>subscription</h3>
+                            <div class="relative aspect-[3/4] rounded-2xl overflow-hidden group">
+                                <img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64ad0c367b8e21b2aa83d9fd_young-muscular-woman-practicing-gym%209.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Bonus 4">
+                                <div class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white to-transparent opacity-90"></div>
+                                <div class="absolute bottom-6 left-6 flex justify-between items-end w-[85%]">
+                                    <span class="font-display text-5xl text-black/40">04</span>
+                                    <button class="px-5 py-2 rounded-full border border-black uppercase text-xs font-bold hover:bg-black hover:text-white transition-colors bg-white/50 backdrop-blur-sm">more details [+]</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="membership" class="py-20 md:py-32 bg-white px-4 md:px-10 max-w-[1600px] mx-auto">
+        <h2 class="font-display text-big uppercase font-bold mb-16">Membership</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-black text-white p-6 rounded-2xl h-[550px] flex flex-col justify-between group hover:-translate-y-2 transition-transform duration-300"><div><div class="flex justify-between border-b border-gray-700 pb-4 mb-6"><span class="text-gray-500 font-display text-2xl">[1]</span><h3 class="font-display text-5xl uppercase">Silver</h3></div><ul class="text-sm text-gray-400 space-y-3"><li>+ Cardio & Weights</li><li>+ Unlimited access</li><li>+ Locker access</li></ul></div><div><div class="font-display text-5xl mb-6">₹2500<span class="text-xl text-gray-500">/mo</span></div><button class="w-full py-4 border border-white rounded-full uppercase font-bold text-xs tracking-wider hover:bg-white hover:text-black transition-colors">Buy [+]</button></div></div>
+            <div class="bg-black text-white p-6 rounded-2xl h-[550px] flex flex-col justify-between group hover:-translate-y-2 transition-transform duration-300"><div><div class="flex justify-between border-b border-gray-700 pb-4 mb-6"><span class="text-gray-500 font-display text-2xl">[2]</span><h3 class="font-display text-5xl uppercase">Gold</h3></div><ul class="text-sm text-gray-400 space-y-3"><li>+ All Equipment Zones</li><li>+ Unlimited access</li><li>+ Group Classes</li></ul></div><div><div class="font-display text-5xl mb-6">₹4500<span class="text-xl text-gray-500">/mo</span></div><button class="w-full py-4 border border-white rounded-full uppercase font-bold text-xs tracking-wider hover:bg-white hover:text-black transition-colors">Buy [+]</button></div></div>
+            <div class="bg-white border border-black text-black p-6 rounded-2xl h-[550px] flex flex-col justify-between group hover:-translate-y-2 transition-transform duration-300 relative overflow-hidden"><div class="absolute top-0 right-0 bg-brand-orange text-white text-[10px] font-bold px-4 py-1 uppercase">Recommended</div><div><div class="flex justify-between border-b border-gray-200 pb-4 mb-6"><span class="text-gray-400 font-display text-2xl">[3]</span><h3 class="font-display text-5xl uppercase leading-none">All<br>Access</h3></div><ul class="text-sm font-medium space-y-3"><li>+ Personal Trainer (2 sessions)</li><li>+ All Locations Access</li><li>+ Spa & Recovery</li></ul></div><div><div class="font-display text-5xl mb-6">₹6000<span class="text-xl text-gray-400">/mo</span></div><button class="w-full py-4 bg-black text-white rounded-full uppercase font-bold text-xs tracking-wider hover:bg-brand-orange transition-colors">Buy [+]</button></div></div>
+            <div class="bg-black text-white p-6 rounded-2xl h-[550px] flex flex-col justify-between group hover:-translate-y-2 transition-transform duration-300"><div><div class="flex justify-between border-b border-gray-700 pb-4 mb-6"><span class="text-gray-500 font-display text-2xl">[4]</span><h3 class="font-display text-5xl uppercase">VIP</h3></div><ul class="text-sm text-gray-400 space-y-3"><li>+ Private Studios</li><li>+ Unlimited PT</li><li>+ Nutrition Plan</li></ul></div><div><div class="font-display text-5xl mb-6">₹9500<span class="text-xl text-gray-500">/mo</span></div><button class="w-full py-4 border border-white rounded-full uppercase font-bold text-xs tracking-wider hover:bg-white hover:text-black transition-colors">Buy [+]</button></div></div>
+        </div>
+    </section>
+
+    <section id="locations" class="py-20 md:py-32 bg-off-white">
+        <div class="px-4 md:px-10 max-w-[1600px] mx-auto">
+             <h2 class="font-display text-huge uppercase font-bold leading-none mb-10">Find your<br>nearest gym</h2>
+             <div class="flex border-b border-black/20 mb-8 overflow-x-auto no-scrollbar"><button onclick="switchTab('mumbai')" class="tab-btn active px-6 py-4 font-display text-3xl md:text-5xl uppercase hover:text-brand-orange transition-colors opacity-100 whitespace-nowrap">Mumbai</button><button onclick="switchTab('nashik')" class="tab-btn px-6 py-4 font-display text-3xl md:text-5xl uppercase hover:text-brand-orange transition-colors opacity-40 whitespace-nowrap">Nashik</button><button onclick="switchTab('panvel')" class="tab-btn px-6 py-4 font-display text-3xl md:text-5xl uppercase hover:text-brand-orange transition-colors opacity-40 whitespace-nowrap">Panvel</button><button onclick="switchTab('pune')" class="tab-btn px-6 py-4 font-display text-3xl md:text-5xl uppercase hover:text-brand-orange transition-colors opacity-40 whitespace-nowrap">Pune</button></div>
+             <div id="tab-mumbai" class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-10 bg-white p-8 md:p-12 rounded-3xl shadow-sm"><div class="flex flex-col justify-between"><div><h3 class="font-display text-5xl md:text-7xl uppercase mb-6">Mumbai</h3><div class="space-y-4 text-lg"><p class="uppercase font-bold text-xs tracking-wider">Contact</p><p>101, Crystal Plaza, New Link Road</p><p>Andheri West, Mumbai, MH 400053</p><a href="#" class="text-gray-500 border-b border-gray-300 inline-block">mumbai@jaguarfitness.in</a></div></div><div class="grid grid-cols-2 gap-4 mt-12 pt-12 border-t border-gray-100"><div class="font-display text-3xl">+91 22 4567 8900</div><div class="font-display text-3xl text-gray-300">+91 98200 12345</div></div></div><div class="h-[400px] lg:h-[500px] rounded-2xl overflow-hidden relative group"><img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64b938da9c8880298a94233e_gym%201.jpg" class="w-full h-full object-cover" alt="gym"><div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-brand-orange rounded-full flex items-center justify-center text-white text-4xl font-display shadow-2xl group-hover:scale-110 transition-transform cursor-pointer">+</div></div></div>
+             <div id="tab-nashik" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-10 bg-white p-8 md:p-12 rounded-3xl shadow-sm"><div class="flex flex-col justify-between"><div><h3 class="font-display text-5xl md:text-7xl uppercase mb-6">Nashik</h3><div class="space-y-4 text-lg"><p class="uppercase font-bold text-xs tracking-wider">Contact</p><p>2nd Floor, Star Zone, College Road</p><p>Nashik, MH 422005</p><a href="#" class="text-gray-500 border-b border-gray-300 inline-block">nashik@jaguarfitness.in</a></div></div><div class="grid grid-cols-2 gap-4 mt-12 pt-12 border-t border-gray-100"><div class="font-display text-3xl">+91 253 234 5678</div></div></div><div class="h-[400px] lg:h-[500px] rounded-2xl overflow-hidden relative group"><img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64ccb31eebd9be09f8d8bcb9_gym%202.jpg" class="w-full h-full object-cover" alt="gym"></div></div>
+             <div id="tab-panvel" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-10 bg-white p-8 md:p-12 rounded-3xl shadow-sm"><div class="flex flex-col justify-between"><div><h3 class="font-display text-5xl md:text-7xl uppercase mb-6">Panvel</h3><div class="space-y-4 text-lg"><p class="uppercase font-bold text-xs tracking-wider">Contact</p><p>Sector 15, New Panvel East</p><p>Navi Mumbai, MH 410206</p><a href="#" class="text-gray-500 border-b border-gray-300 inline-block">panvel@jaguarfitness.in</a></div></div><div class="grid grid-cols-2 gap-4 mt-12 pt-12 border-t border-gray-100"><div class="font-display text-3xl">+91 22 2745 6789</div></div></div><div class="h-[400px] lg:h-[500px] rounded-2xl overflow-hidden relative group"><img src="https://cdn.prod.website-files.com/64ccb336ed4ffd9ca95804c5_gym%203.jpg" class="w-full h-full object-cover" alt="gym"></div></div>
+             <div id="tab-pune" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-10 bg-white p-8 md:p-12 rounded-3xl shadow-sm"><div class="flex flex-col justify-between"><div><h3 class="font-display text-5xl md:text-7xl uppercase mb-6">Pune</h3><div class="space-y-4 text-lg"><p class="uppercase font-bold text-xs tracking-wider">Contact</p><p>404, Onyx Tower, Koregaon Park Annexe</p><p>Pune, MH 411001</p><a href="#" class="text-gray-500 border-b border-gray-300 inline-block">pune@jaguarfitness.in</a></div></div><div class="grid grid-cols-2 gap-4 mt-12 pt-12 border-t border-gray-100"><div class="font-display text-3xl">+91 20 6600 1234</div></div></div><div class="h-[400px] lg:h-[500px] rounded-2xl overflow-hidden relative group"><img src="https://cdn.prod.website-files.com/64abaa9e407895f82253b6fa_image%20classe%204.jpg" class="w-full h-full object-cover" alt="gym"></div></div>
+        </div>
+    </section>
+
+    <section id="cta" class="relative py-24 md:py-32 bg-black text-white overflow-hidden">
+        <img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64b99c52fb777c087f4f40a6_image%20182.png" class="absolute top-0 right-0 w-full h-full object-cover opacity-20 pointer-events-none" alt="bg">
+        <div class="relative max-w-[1600px] mx-auto px-4 md:px-10 flex flex-col lg:flex-row items-center justify-between"><div class="w-full lg:w-1/2 mb-12 lg:mb-0"><h2 class="font-display text-huge uppercase font-bold leading-[0.8]">Put<br><div class="flex items-center gap-4"><img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64b992d577d89c5eac405858_young-muscular-woman-practicing-gym%205.jpg" class="w-24 h-16 md:w-48 md:h-20 object-cover rounded-full" alt="gym"><span class="text-stroke-white">Your</span></div>Fitness<br>First Today</h2><p class="font-display text-2xl md:text-3xl mt-8 border-b border-white inline-block pb-2">50% off trial training</p></div><div class="w-full lg:w-1/3 bg-white/5 backdrop-blur-md p-8 md:p-12 rounded-3xl border border-white/10"><form class="space-y-6"><input type="text" placeholder="Name" class="w-full bg-transparent border-b border-white/30 py-4 text-xl outline-none focus:border-brand-orange transition-colors placeholder-white/30"><input type="email" placeholder="Email" class="w-full bg-transparent border-b border-white/30 py-4 text-xl outline-none focus:border-brand-orange transition-colors placeholder-white/30"><input type="tel" placeholder="Phone" class="w-full bg-transparent border-b border-white/30 py-4 text-xl outline-none focus:border-brand-orange transition-colors placeholder-white/30"><button class="w-full mt-8 bg-brand-orange h-20 rounded-full flex items-center justify-between px-2 pl-8 group hover:bg-white hover:text-black transition-colors"><span class="font-display text-2xl uppercase font-bold">Join Now [+]</span><div class="w-16 h-16 bg-white rounded-full group-hover:bg-brand-orange transition-colors"></div></button></form></div></div>
+    </section>
+
+    <footer class="bg-white border-t border-gray-200 pt-16 pb-12">
+        <div class="max-w-[1600px] mx-auto px-4 md:px-10 grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div><div class="font-display font-bold text-3xl tracking-tighter leading-none mb-8">JAGUAR<span class="text-brand-orange">FITNESS</span></div><div class="flex gap-3 mb-6 opacity-60"><img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64ba24ee42f7724f063754e8_logos_visa.svg" alt="visa"><img src="https://cdn.prod.website-files.com/64a9b04469265b578b40676b/64ba25455edf60c6b4a9ff8a_logos_mastercard.svg" alt="master"></div><p class="text-sm text-gray-400">© 2024 Jaguar Fitness India.<br>All rights reserved</p></div>
+            <div class="flex flex-col space-y-4 font-display text-2xl uppercase border-l border-gray-100 pl-8 h-full"><a href="#classes" class="hover:text-brand-orange transition-colors">Equipments</a><a href="#bonuses" class="hover:text-brand-orange transition-colors">Bonuses</a><a href="#membership" class="hover:text-brand-orange transition-colors">Memberships</a><a href="#locations" class="hover:text-brand-orange transition-colors">Locations</a><div class="mt-auto pt-8 border-t border-gray-100 font-sans text-sm normal-case text-gray-500">You are in control</div></div>
+            <div class="flex flex-col space-y-4 font-display text-2xl uppercase border-l border-gray-100 pl-8 h-full"><a href="#" class="hover:text-brand-orange transition-colors">TikTok</a><a href="#" class="hover:text-brand-orange transition-colors">Facebook</a><a href="#" class="hover:text-brand-orange transition-colors">Instagram</a><div class="mt-auto flex justify-end"><a href="#" class="w-14 h-14 border border-gray-200 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-colors">↑</a></div></div>
+            <div class="flex flex-col justify-end text-sm text-gray-500 border-l border-gray-100 pl-8 space-y-2"><a href="#">Privacy Policy</a><a href="#">Terms & Conditions</a></div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/split-type"></script>
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+    <script>
+        // 1. SETUP GSAP & LENIS
+        gsap.registerPlugin(ScrollTrigger);
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+        });
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // 2. PRELOADER & HERO ANIMATION
+        const tl = gsap.timeline();
+        const heroText = new SplitType('#hero-text', { types: 'chars' });
+        const counter = { value: 0 };
+        const counterElement = document.getElementById('loader-count');
+        const preloader = document.getElementById('preloader');
+
+        tl.to(counter, {
+            value: 100,
+            duration: 2.5,
+            ease: "power4.out",
+            onUpdate: () => {
+                counterElement.innerText = Math.round(counter.value);
+            }
+        })
+        .to(preloader, {
+            yPercent: -100,
+            duration: 1.2,
+            ease: "power3.inOut"
+        })
+        .from(heroText.chars, {
+            y: 100,
+            opacity: 0,
+            rotationZ: 10,
+            stagger: 0.05,
+            duration: 1,
+            ease: "back.out(1.7)"
+        }, "-=0.8")
+        .from("#hero-video", {
+            scale: 1.5,
+            duration: 2,
+            ease: "power2.out"
+        }, "-=1.5");
+
+        // 3. INTRO / BENTO GRID ANIMATION
+        const introHeading = new SplitType('#intro-heading', { types: 'words' });
+        gsap.from(introHeading.words, {
+            scrollTrigger: { trigger: "#intro-grid", start: "top 80%" },
+            y: 100, opacity: 0, stagger: 0.1, duration: 0.8, ease: "power3.out"
+        });
+        gsap.to("#intro-star", {
+            rotation: 360,
+            scrollTrigger: { trigger: "#intro-grid", start: "top bottom", end: "bottom top", scrub: 1 }
+        });
+        gsap.utils.toArray('.grid-item-img').forEach((item, i) => {
+            gsap.from(item, {
+                scrollTrigger: { trigger: item, start: "top 85%" },
+                y: 50, opacity: 0, duration: 1, ease: "power3.out", delay: i * 0.1
+            });
+        });
+        gsap.utils.toArray('.magnetic-circle').forEach((circle) => {
+            gsap.from(circle, {
+                scrollTrigger: { trigger: circle, start: "top 85%" },
+                scale: 0, duration: 0.8, ease: "elastic.out(1, 0.5)"
+            });
+            circle.addEventListener('mousemove', (e) => {
+                const rect = circle.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                gsap.to(circle, { x: x * 0.3, y: y * 0.3, duration: 0.3 });
+            });
+            circle.addEventListener('mouseleave', () => {
+                gsap.to(circle, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+            });
+        });
+
+        // 4. WORKOUTS (STICKY) ANIMATIONS
+        gsap.from(".sticky-img-container", {
+            scrollTrigger: { trigger: "#classes", start: "top 70%" },
+            scale: 0.9, opacity: 0, duration: 1, ease: "power3.out"
+        });
+        gsap.utils.toArray('.list-stagger-item').forEach((item, i) => {
+            gsap.from(item, {
+                scrollTrigger: { trigger: item, start: "top 90%" },
+                y: 50, opacity: 0, duration: 0.8, ease: "power2.out", delay: i * 0.1
+            });
+        });
+
+        // 5. MARQUEE VELOCITY & PARALLAX ANIMATIONS
+        const marquees = document.querySelectorAll('.marquee-track, .marquee-track-reverse');
+        marquees.forEach((marquee, i) => {
+            let isReverse = marquee.classList.contains('marquee-track-reverse');
+            let direction = isReverse ? 1 : -1; 
+            let tween = gsap.to(marquee, {
+                xPercent: direction * 50,
+                repeat: -1,
+                duration: 20,
+                ease: "none"
+            });
+            ScrollTrigger.create({
+                trigger: "body",
+                start: "top top",
+                end: "bottom bottom",
+                onUpdate: (self) => {
+                    const velocity = self.getVelocity();
+                    const timeScale = 1 + (Math.abs(velocity) / 3000); 
+                    gsap.to(tween, { timeScale: timeScale, duration: 0.2, overwrite: true });
+                }
+            });
+        });
+        gsap.utils.toArray('.parallax-img').forEach(img => {
+            gsap.to(img, {
+                yPercent: 15,
+                ease: "none",
+                scrollTrigger: { trigger: img.parentElement, start: "top bottom", end: "bottom top", scrub: true }
+            });
+        });
+
+        // 6. BONUSES HORIZONTAL SCROLL (Step 5)
+        // Only run on Desktop (lg and up) for pin + horizontal scroll
+        ScrollTrigger.matchMedia({
+            "(min-width: 1024px)": function() {
+                const track = document.querySelector(".bonus-track");
+                
+                // Calculate distance to move: Total width of track - Viewport width
+                // We add some padding calculation to ensure it scrolls all the way
+                const getScrollAmount = () => -(track.scrollWidth - window.innerWidth + 100);
+
+                gsap.to(track, {
+                    x: getScrollAmount,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: "#bonuses",
+                        start: "center center", // Start when section center hits viewport center
+                        end: () => `+=${track.scrollWidth - window.innerWidth}`, // Scroll duration = track width
+                        pin: true, // Pin the section
+                        scrub: 1, // Smooth scrub
+                        invalidateOnRefresh: true, // Recalculate on resize
+                    }
+                });
+            }
+        });
+
+        // 7. HELPER LOGIC
+        function showImage(id) {
+            document.querySelectorAll('.hover-reveal-img').forEach(img => img.classList.remove('active'));
+            const target = document.getElementById(id);
+            if(target) target.classList.add('active');
+        }
+        function toggleAccordion(btn) {
+            const item = btn.closest('.accordion-item');
+            const content = item.querySelector('.accordion-content');
+            const icon = item.querySelector('.accordion-icon');
+            const isOpen = item.classList.contains('active');
+            if (isOpen) {
+                item.classList.remove('active');
+                content.style.maxHeight = null;
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                item.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + "px";
+                icon.style.transform = 'rotate(45deg)';
+            }
+        }
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('opacity-100');
+                btn.classList.add('opacity-40');
+            });
+            event.target.classList.remove('opacity-40');
+            event.target.classList.add('opacity-100');
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+        }
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const icon = document.getElementById('menu-btn-icon');
+            menu.classList.toggle('open');
+            icon.innerText = menu.classList.contains('open') ? '[-]' : '[+]';
+        }
+    </script>
+</body>
+</html>
